@@ -14,7 +14,7 @@ Paket ZIP diberi status **source candidate — dependency validation blocked**, 
 |---|---|
 | Node.js | `v22.16.0` |
 | npm | `10.9.2` |
-| Engine project | Node `^20.19.0 || >=22.12.0`, npm `>=10` |
+| Engine project | Node `22.x`, npm `>=10` |
 | Package manager | npm |
 | Lockfile | Belum tersedia karena instalasi registry tidak berhasil |
 

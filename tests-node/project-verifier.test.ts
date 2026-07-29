@@ -210,7 +210,7 @@ test('Node and npm runtime metadata match the Vite 7 support floor', async () =>
     packageManager?: string;
   };
   const nvmrc = (await readFile(new URL('../.nvmrc', import.meta.url), 'utf8')).trim();
-  assert.equal(packageJson.engines?.node, '^20.19.0 || >=22.12.0');
+  assert.equal(packageJson.engines?.node, '22.x');
   assert.equal(packageJson.engines?.npm, '>=10');
   assert.match(packageJson.packageManager ?? '', /^npm@\d+\.\d+\.\d+$/);
   assert.equal(nvmrc, '22.16.0');
