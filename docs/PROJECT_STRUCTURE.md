@@ -35,11 +35,11 @@ attendance-payroll-system/
 │   │   ├── crud/                      # Form/dialog CRUD reusable
 │   │   ├── data-table/                # Table, toolbar, filter, state reusable
 │   │   └── ui/                        # Primitive UI bergaya Shadcn/Radix
-│   ├── context/                       # Auth, locale, provider aplikasi
+│   ├── context/                       # Auth, locale, provider, sinkronisasi Supabase terpusat
 │   ├── hooks/                         # Hook lintas fitur
 │   ├── i18n/                          # Kamus id/en/zh dan translator
 │   ├── layout/                        # Shell, header, sidebar, command palette
-│   ├── lib/                           # Supabase client, env, cache, shared infra
+│   ├── lib/                           # Supabase client, env, kebijakan cache/auth/realtime, shared infra
 │   ├── middleware/                    # Route guard auth/permission
 │   ├── pages/                         # Halaman per domain bisnis
 │   │   ├── admin/
@@ -88,7 +88,7 @@ attendance-payroll-system/
 ├── eslint.config.js
 ├── index.html
 ├── package.json
-├── package-lock.json                 # Dibuat setelah instalasi registry berhasil; belum disertakan pada source candidate ini
+├── package-lock.json                 # Lockfile npm v3 yang disertakan dan di-commit
 ├── tsconfig.app.json
 ├── tsconfig.json
 ├── tsconfig.node.json
@@ -123,7 +123,7 @@ Vercel/Supabase local state
 backup/data produksi
 ```
 
-`package-lock.json` belum disertakan pada source candidate ini karena registry npm lingkungan validasi mengembalikan HTTP 503. Setelah `npm install` berhasil pada registry yang sehat, review dan commit lockfile; workflow otomatis beralih dari `npm install` ke `npm ci`. Release produksi tetap wajib memiliki lockfile yang tervalidasi.
+`package-lock.json` disertakan dan di-commit. Gunakan `npm ci` pada clone bersih, CI, dan deployment. Saat dependency diubah, jalankan instalasi pada registry yang sehat, review diff lockfile, lalu ulangi seluruh quality gate sebelum commit.
 
 ## Menambah fitur baru
 

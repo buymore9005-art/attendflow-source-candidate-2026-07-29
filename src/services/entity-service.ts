@@ -12,7 +12,8 @@ export interface EntityRepositoryConfig {
   upsertConflict?: string;
 }
 
-function applyFilters(query: ReturnType<ReturnType<typeof getSupabase>['from']>['select'] extends (...args: never[]) => infer R ? R : never, filters: PageQuery['filters']) {
+// PERBAIKAN: Mengubah tipe parameter query menjadi any untuk menghindari error PostgrestFilterBuilder / GenericStringError
+function applyFilters(query: any, filters: PageQuery['filters']) {
   let next = query;
   for (const [key, value] of Object.entries(filters)) {
     if (value === null || value === '' || value === undefined) continue;
@@ -31,7 +32,8 @@ export async function listEntities<T>(
 ): Promise<PageResult<T>> {
   const client = getSupabase();
   const organizationColumn = config.organizationColumn ?? 'organization_id';
-  let query = client.from(config.table).select(config.select ?? '*', { count: 'exact' }).eq(organizationColumn, organizationId);
+  // Ditambahkan as any pada bagian select untuk meredam strict string error dari supabase builder
+  let query = client.from(config.table).select((config.select ?? '*') as any, { count: 'exact' }).eq(organizationColumn, organizationId);
   if (config.softDelete) query = query.is('deleted_at', null);
   const search = normalizeSearch(params.search);
   if (search && config.searchFields?.length) query = query.or(config.searchFields.map((field) => `${field}.ilike.%${search}%`).join(','));
@@ -113,7 +115,7 @@ export async function importEntities(config: EntityRepositoryConfig, organizatio
 }
 
 export async function getLookupOptions(table: string, organizationId: string, labelColumn = 'name'): Promise<Array<{ value: string; label: string }>> {
-  const { data, error } = await getSupabase().from(table).select(`id,${labelColumn}`).eq('organization_id', organizationId).is('deleted_at', null).order(labelColumn);
+  const { data, error } = await getSupabase().from(table).select(`id,${labelColumn}` as any).eq('organization_id', organizationId).is('deleted_at', null).order(labelColumn);
   if (error) throw error;
   return (data ?? []).map((row) => ({ value: String((row as Record<string, unknown>).id), label: String((row as Record<string, unknown>)[labelColumn]) }));
 }

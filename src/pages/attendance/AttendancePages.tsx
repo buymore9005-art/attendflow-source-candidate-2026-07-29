@@ -1,13 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Calculator } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { EntityFormDialog, type EntityFormValues } from '@/components/crud/EntityFormDialog';
 import { DataPage } from '@/components/data-table/DataPage';
 import { useAuth } from '@/context/AuthContext';
 import { useLocale } from '@/context/LocaleContext';
-import { getSupabase } from '@/lib/supabase';
 import { asErrorMessage } from '@/lib/utils';
 import { bulkUpdateEntities, createEntity, deleteEntities, getLookupOptions, importEntities, listAllEntities, listEntities, updateEntity, type EntityRepositoryConfig } from '@/services/entity-service';
 import type { DataColumn, FilterDefinition, PageQuery, PageResult } from '@/types/data-table';
@@ -58,12 +57,6 @@ function AttendanceRecordsPage({ mode }: { mode: 'daily' | 'history' }) {
     const [employees, shifts, devices] = await Promise.all([getLookupOptions('employees', organizationId, 'full_name'), getLookupOptions('shifts', organizationId), getLookupOptions('attendance_devices', organizationId)]);
     return { employees, shifts, devices };
   }});
-  useEffect(() => {
-    if (!organizationId) return;
-    const client = getSupabase();
-    const channel = client.channel(`attendance-list:${organizationId}`).on('postgres_changes', { event: '*', schema: 'public', table: 'attendance_records', filter: `organization_id=eq.${organizationId}` }, () => void queryClient.invalidateQueries({ queryKey })).subscribe();
-    return () => { void client.removeChannel(channel); };
-  }, [organizationId, queryClient, queryKey]);
   const fields = useMemo<FormFieldConfig[]>(() => [
     { name: 'employee_id', labelKey: 'employee.fullName', type: 'select', required: true, options: lookups.data?.employees.map((item) => ({ value: item.value, label: item.label })) ?? [] },
     { name: 'work_date', labelKey: 'attendance.workDate', type: 'date', required: true },

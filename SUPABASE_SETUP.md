@@ -199,13 +199,17 @@ SMTP bawaan Supabase hanya cocok untuk pengembangan: penerima dibatasi pada alam
 
 ## 9. Realtime
 
-Schema menambahkan tabel operasional ke publication `supabase_realtime`. UI membuka channel organization-scoped dan menginvalidasi query terkait. Bila perubahan tidak realtime:
+Schema menambahkan delapan tabel operasional ke publication `supabase_realtime`: `attendance_records`, `attendance_devices`, `biometric_enrollments`, `biometric_assets`, `device_commands`, `integration_jobs`, `system_notifications`, dan `payroll_runs`.
+
+UI membuka satu channel per pasangan user/organisasi. Event `INSERT` dan `UPDATE` memakai filter `organization_id`, lalu menginvalidasi seluruh query turunan yang relevan, termasuk dashboard, ringkasan absensi, pengaturan cursor Deli, dan lookup mesin. Untuk perubahan yang terlewat, reconnect, serta `DELETE`, aplikasi merekonsiliasi query aktif ketika channel berstatus `SUBSCRIBED`, browser kembali online, tab kembali terlihat, dan setiap 30 detik selama tab online serta terlihat.
+
+Bila perubahan tidak realtime:
 
 ```sql
 select * from pg_publication_tables where pubname='supabase_realtime';
 ```
 
-Periksa juga koneksi websocket browser dan quota project.
+Pastikan kedelapan tabel tercantum, periksa koneksi WebSocket/CSP browser, status channel di console, RLS user, dan quota project. Refresh manual tetap dapat dipakai untuk memaksa query aktif mengambil data terbaru.
 
 ## 10. Seed demonstrasi
 

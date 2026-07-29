@@ -14,7 +14,7 @@ AttendFlow adalah aplikasi absensi, biometrik, cuti, payroll, integrasi, audit, 
 - Modul dashboard, karyawan, registrasi wizard, departemen, jabatan, shift, mesin, biometrik, absensi, izin/cuti, payroll, pengguna, role, audit, pengaturan, notifikasi, Deli E+, backup/restore.
 - Supabase SQL lengkap: 33 tabel, PK/FK/index/constraint, 3 view, trigger, function/RPC, RLS, Storage policy, Realtime publication, seed demo, scheduler, dan audit immutable.
 - Supabase Edge Functions untuk ADMS, perintah mesin, Deli E+, administrasi pengguna, backup/restore, dan scheduled maintenance.
-- Cache baca TanStack Query dengan persistensi localStorage opsional, realtime invalidation, code splitting, dan optimasi ekspor. Mutasi tidak diantrikan ketika offline agar operasi payroll, absensi, dan administrasi tidak tampak berhasil sebelum diterima Supabase.
+- Cache baca TanStack Query dengan persistensi `localStorage` opsional yang dipisahkan per pengguna, bootstrap profil/organisasi/izin untuk reload offline, eviksi query tertua saat kuota penuh, pengecualian signed URL, serta pembersihan saat logout atau pergantian akun. Sinkronisasi Supabase dipusatkan dalam satu channel per organisasi/pengguna dan dilengkapi rekonsiliasi berkala ketika Realtime terputus atau melewatkan perubahan. Mutasi tidak diantrikan ketika offline agar operasi payroll, absensi, dan administrasi tidak tampak berhasil sebelum diterima Supabase.
 
 ## Arsitektur
 

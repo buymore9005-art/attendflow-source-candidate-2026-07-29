@@ -105,7 +105,11 @@ Buat backup sebelum perubahan besar. File terenkripsi disimpan privat. Restore m
 
 ## 15. Offline
 
-Query cache yang pernah berhasil dimuat dapat dibaca dari `localStorage` saat offline selama belum kedaluwarsa. Mutasi memerlukan jaringan aktif dan tidak dipersist atau dianggap berhasil ketika offline. Operasi sensitif seperti approval dan finalisasi payroll harus dilakukan online.
+Data query yang pernah berhasil dimuat dapat dibaca dari `localStorage` hingga 24 jam ketika `VITE_ENABLE_OFFLINE_CACHE=true`. Cache dipisahkan berdasarkan user Supabase. Profil, daftar organisasi, dan izin organisasi aktif juga disimpan sehingga user yang sama dapat membuka kembali organisasi yang sebelumnya berhasil dimuat walaupun aplikasi direload tanpa jaringan.
+
+Signed URL privat tidak disimpan karena URL tersebut berumur pendek. Saat kuota browser penuh, cache query tertua dibuang terlebih dahulu. Logout, sign-out otomatis, atau pergantian akun menghapus cache user sebelumnya dan membatalkan penulisan tertunda. Setelah koneksi kembali, query aktif direkonsiliasi dengan Supabase.
+
+Offline hanya berlaku untuk data yang sudah pernah dimuat oleh user tersebut. Login pertama, organisasi baru, dan data yang belum pernah dibuka tetap memerlukan jaringan. Mutasi tidak dipersist atau dianggap berhasil ketika offline; approval dan finalisasi payroll harus dilakukan online.
 
 ## 16. Error umum
 

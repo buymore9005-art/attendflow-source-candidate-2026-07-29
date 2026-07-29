@@ -1,13 +1,14 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Toaster } from 'sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { env } from '@/lib/env';
-import { queryClient, queryPersister } from '@/lib/query-client';
+import { QUERY_CACHE_BUSTER, QUERY_CACHE_MAX_AGE_MS, createQueryClient, createQueryPersister, removeLegacyQueryCache, shouldPersistQuery } from '@/lib/query-client';
 import { useUiStore } from '@/stores/ui-store';
-import { AuthProvider } from './AuthContext';
+import { AuthProvider, useAuth } from './AuthContext';
 import { LocaleProvider } from './LocaleContext';
+import { SupabaseSyncController } from './SupabaseSyncController';
 
 function ThemeController() {
   const theme = useUiStore((state) => state.theme);
@@ -24,24 +25,14 @@ function ThemeController() {
   return null;
 }
 
-function ApplicationContext({ children }: { children: ReactNode }) {
-  return (
-    <LocaleProvider>
-      <TooltipProvider delayDuration={250}>
-        <AuthProvider>
-          <ThemeController />
-          {children}
-          <Toaster richColors position="top-right" closeButton />
-        </AuthProvider>
-      </TooltipProvider>
-    </LocaleProvider>
-  );
-}
+function QueryProviderInstance({ cacheScope, children }: { cacheScope: string; children: ReactNode }) {
+  const [queryClient] = useState(createQueryClient);
+  const persister = useMemo(() => cacheScope.startsWith('user:') ? createQueryPersister(cacheScope.slice(5)) : null, [cacheScope]);
+  const content = <><SupabaseSyncController />{children}</>;
 
-export function AppProviders({ children }: { children: ReactNode }) {
-  const content = <ApplicationContext>{children}</ApplicationContext>;
+  useEffect(() => { removeLegacyQueryCache(); }, []);
 
-  if (!env.offlineCacheEnabled) {
+  if (!env.offlineCacheEnabled || !persister) {
     return <QueryClientProvider client={queryClient}>{content}</QueryClientProvider>;
   }
 
@@ -49,13 +40,42 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <PersistQueryClientProvider
       client={queryClient}
       persistOptions={{
-        persister: queryPersister,
-        maxAge: 24 * 60 * 60 * 1000,
-        buster: '1.0.0',
-        dehydrateOptions: { shouldDehydrateMutation: () => false }
+        persister,
+        maxAge: QUERY_CACHE_MAX_AGE_MS,
+        buster: QUERY_CACHE_BUSTER,
+        dehydrateOptions: {
+          shouldDehydrateMutation: () => false,
+          shouldDehydrateQuery: shouldPersistQuery
+        }
       }}
     >
       {content}
     </PersistQueryClientProvider>
   );
+}
+
+function ScopedQueryProvider({ children }: { children: ReactNode }) {
+  const { loading, user } = useAuth();
+  const cacheScope = loading ? 'loading' : user ? `user:${user.id}` : 'anonymous';
+  return <QueryProviderInstance key={cacheScope} cacheScope={cacheScope}>{children}</QueryProviderInstance>;
+}
+
+function ApplicationContext({ children }: { children: ReactNode }) {
+  return (
+    <LocaleProvider>
+      <TooltipProvider delayDuration={250}>
+        <AuthProvider>
+          <ScopedQueryProvider>
+            <ThemeController />
+            {children}
+            <Toaster richColors position="top-right" closeButton />
+          </ScopedQueryProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </LocaleProvider>
+  );
+}
+
+export function AppProviders({ children }: { children: ReactNode }) {
+  return <ApplicationContext>{children}</ApplicationContext>;
 }

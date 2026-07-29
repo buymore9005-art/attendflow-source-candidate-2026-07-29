@@ -18,7 +18,7 @@ git commit -m "feat: release AttendFlow"
 git push origin main
 ```
 
-Source candidate ini belum menyertakan `package-lock.json` karena registry npm pada lingkungan validasi mengembalikan HTTP 503. Gunakan `npm install` untuk instalasi pertama pada registry yang sehat, jalankan seluruh quality gate, lalu commit lockfile dan ubah Install Command menjadi `npm ci` sebelum go-live.
+`package-lock.json` versi 3 sudah disertakan dan di-commit. Gunakan clean install berbasis lockfile agar dependency lokal, CI, dan Vercel identik; perubahan dependency harus memperbarui `package.json` dan `package-lock.json` secara bersamaan.
 
 ## 2. Import project
 
@@ -27,7 +27,7 @@ Source candidate ini belum menyertakan `package-lock.json` karena registry npm p
 3. Import repository GitHub.
 4. Framework preset: **Vite**.
 5. Root Directory: root repository.
-6. Install Command: `npm install --no-audit --no-fund` untuk validasi pertama; setelah lockfile berhasil dibuat dan di-commit, ubah menjadi `npm ci --no-audit --no-fund`.
+6. Install Command: `npm ci --no-audit --no-fund`.
 7. Build Command: `npm run build`.
 8. Output Directory: `dist`.
 9. Node.js Version: 22.x.
@@ -78,7 +78,9 @@ Domain preview berubah pada tiap branch/deployment. Untuk Auth, gunakan staging 
 
 ## 7. Cache
 
-Asset Vite memakai content hash dan diberi cache immutable. Query cache browser dapat dipersist ke `localStorage` selama 24 jam bila `VITE_ENABLE_OFFLINE_CACHE=true`. Ini hanya cache baca; mutasi payroll, absensi, dan administrasi tidak dianggap berhasil ketika offline.
+Asset Vite memakai content hash dan diberi cache immutable. Bila `VITE_ENABLE_OFFLINE_CACHE=true`, query yang berhasil serta bootstrap profil/organisasi/izin dapat dipersist ke `localStorage` selama 24 jam. Kunci cache dipisahkan per user Supabase; signed URL tidak dipersist; query tertua dievikt ketika kuota penuh; dan cache user dicabut saat logout, sign-out otomatis, atau pergantian akun.
+
+Cache ini hanya untuk baca. Mutasi payroll, absensi, dan administrasi tidak dianggap berhasil ketika offline. Gunakan browser profile yang terpisah pada komputer bersama dan selalu logout setelah selesai, karena `localStorage` berada pada perangkat/browser pengguna.
 
 ## 8. Troubleshooting
 
@@ -86,7 +88,7 @@ Asset Vite memakai content hash dan diberi cache immutable. Query cache browser 
 
 ```bash
 rm -rf node_modules dist
-if [ -f package-lock.json ]; then npm ci; else npm install; fi
+npm ci --no-audit --no-fund
 npm run check
 ```
 
@@ -106,7 +108,7 @@ Scheme, host, dan path redirect harus cocok dengan deployment. Periksa browser N
 
 ### UI lama setelah deploy
 
-Lakukan hard refresh atau hapus site data. Cache baca berada di localStorage, bukan IndexedDB mutation queue.
+Lakukan hard refresh atau hapus site data. Cache baca menggunakan localStorage, bukan IndexedDB; kuncinya dipisahkan per user dan tidak berfungsi sebagai mutation queue. Setelah deploy yang mengubah bentuk data, naikkan buster cache di `src/lib/query-cache-policy.ts`.
 
 ## 9. Checklist sebelum penggunaan perusahaan
 

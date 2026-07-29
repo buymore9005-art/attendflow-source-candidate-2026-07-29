@@ -22,27 +22,27 @@ git --version
 
 ## 2. Instalasi deterministik
 
-Pada source candidate tanpa lockfile, lakukan instalasi pertama dengan registry yang sehat:
+Repository menyertakan `package-lock.json` versi 3. Gunakan `npm ci` agar dependency yang diuji sama dengan dependency pada lockfile:
 
 ```bash
-npm install --no-audit --no-fund
+npm ci --no-audit --no-fund
 npm ls --depth=0
 ```
 
-Setelah instalasi, review dan commit `package-lock.json`. Mulai saat itu gunakan `npm ci --no-audit --no-fund` pada clone bersih, CI, dan deployment. Jangan menghapus konflik dengan `--force` atau `--legacy-peer-deps`; cari akar konflik dan pilih versi yang kompatibel.
+Jangan memakai `--force` atau `--legacy-peer-deps`; bila clean install melaporkan konflik, perbaiki versi/peer dependency dan review perubahan `package.json` serta `package-lock.json` bersama-sama.
 
 Untuk menguji benar-benar dari keadaan bersih:
 
 ```bash
 rm -rf node_modules dist coverage
-if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
+npm ci --no-audit --no-fund
 ```
 
 Pada Windows PowerShell:
 
 ```powershell
 Remove-Item node_modules,dist,coverage -Recurse -Force -ErrorAction SilentlyContinue
-if (Test-Path package-lock.json) { npm ci --no-audit --no-fund } else { npm install --no-audit --no-fund }
+npm ci --no-audit --no-fund
 ```
 
 ## 3. Pemeriksaan otomatis

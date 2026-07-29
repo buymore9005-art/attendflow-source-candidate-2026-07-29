@@ -1,6 +1,6 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Activity, Banknote, BriefcaseBusiness, CalendarCheck, CircleOff, ClockAlert, ClockArrowDown, Fingerprint, HeartPulse, Laptop, LoaderCircle, Palmtree, ShieldAlert, Timer, UserCheck, UserMinus, Users } from 'lucide-react';
-import { useEffect, useMemo, type ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip as ChartTooltip, XAxis, YAxis } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,6 @@ import { EmptyState, ErrorState, TableSkeleton } from '@/components/data-table/D
 import { useAuth } from '@/context/AuthContext';
 import { useLocale } from '@/context/LocaleContext';
 import type { TranslationParams } from '@/i18n/translator';
-import { getSupabase } from '@/lib/supabase';
 import { formatCurrency, formatDateTime } from '@/utils/format';
 import { getDashboardData, type SeriesPoint } from '@/services/dashboard-service';
 
@@ -65,18 +64,7 @@ export default function DashboardPage() {
   const timeZone = activeMembership?.organization?.time_zone ?? 'Asia/Jakarta';
   const today = useMemo(() => new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()), [timeZone]);
   const queryKey = useMemo(() => ['dashboard', organizationId, today] as const, [organizationId, today]);
-  const queryClient = useQueryClient();
   const query = useQuery({ queryKey, queryFn: () => getDashboardData(organizationId, today), enabled: Boolean(organizationId), refetchInterval: 60_000 });
-  useEffect(() => {
-    if (!organizationId) return;
-    const client = getSupabase();
-    const channel = client.channel(`dashboard:${organizationId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance_records', filter: `organization_id=eq.${organizationId}` }, () => void queryClient.invalidateQueries({ queryKey }))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance_devices', filter: `organization_id=eq.${organizationId}` }, () => void queryClient.invalidateQueries({ queryKey }))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'system_notifications', filter: `organization_id=eq.${organizationId}` }, () => void queryClient.invalidateQueries({ queryKey }))
-      .subscribe();
-    return () => { void client.removeChannel(channel); };
-  }, [organizationId, queryClient, queryKey]);
 
   if (query.isPending) return <div className="space-y-6"><div><h1 className="text-3xl font-semibold">{t('dashboard.title')}</h1><p className="text-muted-foreground">{t('dashboard.subtitle')}</p></div><TableSkeleton columns={6} rows={4} /></div>;
   if (query.isError) return <ErrorState message={query.error.message} onRetry={() => void query.refetch()} />;

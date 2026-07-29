@@ -1,5 +1,9 @@
 import type { Session, User } from '@supabase/supabase-js';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createAuthBootstrapCache, membershipPermissionCacheKey, type AuthBootstrapSnapshot } from '@/lib/auth-bootstrap-cache';
+import { planAuthIdentityTransition } from '@/lib/auth-session-policy';
+import { env } from '@/lib/env';
+import { getQueryCacheStorage, removePersistedUserCache } from '@/lib/query-client';
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useUiStore } from '@/stores/ui-store';
 import type { OrganizationMembership, Profile } from '@/types/domain';
@@ -52,58 +56,122 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(configured);
   const activeOrganizationId = useUiStore((state) => state.activeOrganizationId);
   const setActiveOrganizationId = useUiStore((state) => state.setActiveOrganizationId);
+  const activeRequestRef = useRef('');
+  const sessionUserIdRef = useRef('');
+  const userId = session?.user.id ?? '';
+  activeRequestRef.current = `${userId}:${activeOrganizationId ?? ''}`;
+
+  const clearBootstrapState = useCallback(() => {
+    setProfile(null);
+    setMemberships([]);
+    setRolePermissions([]);
+  }, []);
+
+  const applyBootstrapSnapshot = useCallback((snapshot: AuthBootstrapSnapshot) => {
+    setProfile(snapshot.profile);
+    setMemberships(snapshot.memberships);
+    const selected = snapshot.memberships.find(
+      (membership) => membership.organization_id === activeOrganizationId
+    ) ?? snapshot.memberships[0] ?? null;
+    if (selected && selected.organization_id !== activeOrganizationId) {
+      setActiveOrganizationId(selected.organization_id);
+    }
+    setRolePermissions(
+      selected ? snapshot.rolePermissionsByMembership[membershipPermissionCacheKey(selected)] ?? [] : []
+    );
+  }, [activeOrganizationId, setActiveOrganizationId]);
 
   const refreshMemberships = useCallback(async () => {
-    if (!configured || !session?.user) {
-      setProfile(null);
-      setMemberships([]);
-      setRolePermissions([]);
+    if (!configured || !userId) {
+      clearBootstrapState();
       return;
     }
+
+    const requestKey = `${userId}:${activeOrganizationId ?? ''}`;
+    const storage = env.offlineCacheEnabled ? getQueryCacheStorage() : undefined;
+    const cache = storage ? createAuthBootstrapCache(userId, storage) : null;
+    const cachedSnapshot = cache?.read() ?? null;
     const supabase = getSupabase();
     const [profileResult, membershipsResult] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle(),
-      supabase.from('organization_members').select('*, organization:organizations(*)').eq('user_id', session.user.id).eq('status', 'active').order('created_at')
+      supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
+      supabase.from('organization_members').select('*, organization:organizations(*)').eq('user_id', userId).eq('status', 'active').order('created_at')
     ]);
     if (profileResult.error) throw profileResult.error;
     if (membershipsResult.error) throw membershipsResult.error;
-    setProfile((profileResult.data as Profile | null) ?? null);
+
     const nextMemberships = ((membershipsResult.data ?? []) as Record<string, unknown>[]).map(normalizeMembership);
-    setMemberships(nextMemberships);
-    const selected = nextMemberships.find((membership) => membership.organization_id === activeOrganizationId) ?? nextMemberships[0] ?? null;
-    if (selected && selected.organization_id !== activeOrganizationId) setActiveOrganizationId(selected.organization_id);
-    if (!selected) {
-      setRolePermissions([]);
-      return;
+    const selected = nextMemberships.find(
+      (membership) => membership.organization_id === activeOrganizationId
+    ) ?? nextMemberships[0] ?? null;
+    let nextRolePermissions: string[] = [];
+    if (selected) {
+      const permissionsResult = await supabase.from('role_permissions').select('permissions').eq('organization_id', selected.organization_id).eq('role', selected.role).maybeSingle();
+      if (permissionsResult.error) throw permissionsResult.error;
+      const permissions = (permissionsResult.data as { permissions?: unknown } | null)?.permissions;
+      nextRolePermissions = Array.isArray(permissions) ? permissions.map(String) : [];
     }
-    const permissionsResult = await supabase.from('role_permissions').select('permissions').eq('organization_id', selected.organization_id).eq('role', selected.role).maybeSingle();
-    if (permissionsResult.error) throw permissionsResult.error;
-    const permissions = (permissionsResult.data as { permissions?: unknown } | null)?.permissions;
-    setRolePermissions(Array.isArray(permissions) ? permissions.map(String) : []);
-  }, [activeOrganizationId, configured, session?.user, setActiveOrganizationId]);
+
+    if (activeRequestRef.current !== requestKey) return;
+    const rolePermissionsByMembership = { ...(cachedSnapshot?.rolePermissionsByMembership ?? {}) };
+    if (selected) rolePermissionsByMembership[membershipPermissionCacheKey(selected)] = nextRolePermissions;
+    const nextSnapshot: AuthBootstrapSnapshot = {
+      profile: (profileResult.data as Profile | null) ?? null,
+      memberships: nextMemberships,
+      rolePermissionsByMembership
+    };
+    cache?.write(nextSnapshot);
+    applyBootstrapSnapshot(nextSnapshot);
+  }, [activeOrganizationId, applyBootstrapSnapshot, clearBootstrapState, configured, userId]);
 
   useEffect(() => {
     if (!configured) return;
     const supabase = getSupabase();
-    void supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    let disposed = false;
+    const applySession = (nextSession: Session | null) => {
+      if (disposed) return;
+      const nextUserId = nextSession?.user.id ?? '';
+      const transition = planAuthIdentityTransition(sessionUserIdRef.current, nextUserId);
+      sessionUserIdRef.current = nextUserId;
+      if (transition.userIdToClear) removePersistedUserCache(transition.userIdToClear);
+      if (transition.identityChanged) setLoading(transition.shouldLoadBootstrap);
       setSession(nextSession);
-      setLoading(false);
+    };
+
+    void supabase.auth.getSession()
+      .then(({ data }) => applySession(data.session))
+      .catch(() => {
+        if (!disposed) setLoading(false);
+      });
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      applySession(nextSession);
     });
-    return () => subscription.subscription.unsubscribe();
+    return () => {
+      disposed = true;
+      subscription.subscription.unsubscribe();
+    };
   }, [configured]);
 
   useEffect(() => {
-    setLoading(configured && Boolean(session));
+    if (!configured || !userId) {
+      clearBootstrapState();
+      setLoading(false);
+      return;
+    }
+
+    const storage = env.offlineCacheEnabled ? getQueryCacheStorage() : undefined;
+    const cachedSnapshot = storage ? createAuthBootstrapCache(userId, storage).read() : null;
+    if (cachedSnapshot) applyBootstrapSnapshot(cachedSnapshot);
+    else clearBootstrapState();
+    setLoading(!cachedSnapshot);
+
+    let disposed = false;
     void refreshMemberships().catch(() => {
-      setProfile(null);
-      setMemberships([]);
-      setRolePermissions([]);
-    }).finally(() => setLoading(false));
-  }, [configured, refreshMemberships, session]);
+      if (!disposed && !cachedSnapshot) clearBootstrapState();
+    }).finally(() => {
+      if (!disposed) setLoading(false);
+    });
+    return () => { disposed = true; };
+  }, [applyBootstrapSnapshot, clearBootstrapState, configured, refreshMemberships, userId]);
 
   const activeMembership = useMemo(
     () => memberships.find((membership) => membership.organization_id === activeOrganizationId) ?? memberships[0] ?? null,
@@ -130,6 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    const currentUserId = session?.user.id;
     const supabase = getSupabase();
     const { error: auditError } = await supabase.rpc('log_client_activity', {
       p_event_type: 'auth', p_action: 'logout', p_entity_type: 'session', p_entity_id: null,
@@ -138,10 +207,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (auditError) throw new Error(`Logout audit failed: ${auditError.message}`);
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-    setProfile(null);
-    setMemberships([]);
-    setRolePermissions([]);
-  }, []);
+    if (currentUserId) removePersistedUserCache(currentUserId);
+    clearBootstrapState();
+  }, [clearBootstrapState, session?.user.id]);
 
   const createOrganization = useCallback(async ({ name, code }: CreateOrganizationInput) => {
     const { data, error } = await getSupabase().rpc('create_organization', { p_name: name.trim(), p_code: code.trim().toUpperCase() });

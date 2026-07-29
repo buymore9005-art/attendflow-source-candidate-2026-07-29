@@ -53,7 +53,6 @@ attendance-payroll-system/
 │   │   │   ├── DataStates.tsx
 │   │   │   ├── DataTable.tsx
 │   │   │   └── DataToolbar.tsx
-│   │   ├── forms/
 │   │   ├── ui/
 │   │   │   ├── alert-dialog.tsx
 │   │   │   ├── avatar.tsx
@@ -77,7 +76,8 @@ attendance-payroll-system/
 │   ├── context/
 │   │   ├── AppProviders.tsx
 │   │   ├── AuthContext.tsx
-│   │   └── LocaleContext.tsx
+│   │   ├── LocaleContext.tsx
+│   │   └── SupabaseSyncController.tsx
 │   ├── hooks/
 │   │   ├── use-debounce.ts
 │   │   └── use-online-status.ts
@@ -91,8 +91,12 @@ attendance-payroll-system/
 │   │   ├── navigation.ts
 │   │   └── Sidebar.tsx
 │   ├── lib/
+│   │   ├── auth-bootstrap-cache.ts
+│   │   ├── auth-session-policy.ts
 │   │   ├── env.ts
+│   │   ├── query-cache-policy.ts
 │   │   ├── query-client.ts
+│   │   ├── realtime-sync.ts
 │   │   ├── supabase.ts
 │   │   └── utils.ts
 │   ├── middleware/
@@ -113,7 +117,6 @@ attendance-payroll-system/
 │   │   │   └── CrudEntityPage.tsx
 │   │   ├── dashboard/
 │   │   │   └── DashboardPage.tsx
-│   │   ├── data/
 │   │   ├── devices/
 │   │   │   ├── BiometricsPage.tsx
 │   │   │   └── DevicesPage.tsx
@@ -124,7 +127,6 @@ attendance-payroll-system/
 │   │   │   └── NotFoundPage.tsx
 │   │   ├── integrations/
 │   │   │   └── IntegrationPages.tsx
-│   │   ├── master/
 │   │   ├── notifications/
 │   │   │   └── NotificationsPage.tsx
 │   │   ├── organization/
@@ -204,8 +206,11 @@ attendance-payroll-system/
 │   ├── adms-route.test.ts
 │   ├── adms.test.ts
 │   ├── attendance.test.ts
+│   ├── auth-bootstrap-cache.test.ts
+│   ├── auth-session-policy.test.ts
 │   ├── backup-generator.test.ts
 │   ├── backup-validation.test.ts
+│   ├── cache-sync-contract.test.ts
 │   ├── ci-install-contract.test.ts
 │   ├── crud-presets.test.ts
 │   ├── deli-integration-contract.test.ts
@@ -226,6 +231,8 @@ attendance-payroll-system/
 │   ├── permission.test.ts
 │   ├── print-window.test.ts
 │   ├── project-verifier.test.ts
+│   ├── query-cache-policy.test.ts
+│   ├── realtime-sync.test.ts
 │   ├── retry.test.ts
 │   ├── schema-contract.test.ts
 │   ├── settings-authority.test.ts
@@ -243,6 +250,7 @@ attendance-payroll-system/
 ├── FINGERPRINT_GUIDE.md
 ├── index.html
 ├── INSTALL.md
+├── package-lock.json
 ├── package.json
 ├── PAYROLL_GUIDE.md
 ├── README.md

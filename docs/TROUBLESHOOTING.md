@@ -159,13 +159,31 @@ Bucket privat memerlukan signed URL yang belum kedaluwarsa. Pastikan object path
 
 ### UI tidak diperbarui otomatis
 
-Periksa Realtime publication, table yang disubscribe, koneksi WebSocket, CSP `connect-src`, dan status project. Refresh manual harus tetap bekerja sebagai fallback.
+Periksa apakah kedelapan tabel operasional tercantum di publication `supabase_realtime`, koneksi WebSocket, CSP `connect-src`, RLS user, dan status project. Aplikasi memakai satu channel terpusat per user/organisasi dan rekonsiliasi setiap 30 detik ketika tab online serta terlihat. Refresh manual harus tetap bekerja sebagai fallback.
+
+### Perubahan hapus baru terlihat terlambat
+
+Event `INSERT` dan `UPDATE` memakai filter organisasi. Perubahan `DELETE` dipulihkan melalui rekonsiliasi berkala, saat channel tersambung kembali, saat browser kembali online, atau saat tab kembali terlihat. Bila lebih dari 30 detik tidak berubah, periksa request refetch pada Network tab dan error RLS/PostgREST.
 
 ### Event ganda
 
-Pastikan subscription lama di-unsubscribe saat organisasi/route berubah dan idempotency diterapkan pada event yang dapat dikirim ulang.
+Pastikan tidak ada page yang membuka channel tambahan untuk tabel yang sudah dikelola `SupabaseSyncController`. Subscription terpusat akan dilepas otomatis saat user atau organisasi berubah; backend tetap harus idempoten terhadap event yang dapat dikirim ulang.
 
-## 8. SQL Supabase
+## 8. Cache offline
+
+### Reload offline diarahkan ke onboarding
+
+Cache offline hanya tersedia setelah profil, membership organisasi, izin, dan query pernah berhasil dimuat oleh user yang sama. Pastikan `VITE_ENABLE_OFFLINE_CACHE=true`, session Supabase masih tersimpan, dan site data tidak dihapus. Login pertama atau organisasi yang belum pernah dibuka memerlukan jaringan.
+
+### Data user sebelumnya masih terlihat
+
+Gunakan source terbaru, logout melalui aplikasi, lalu periksa bahwa tidak ada key lama `attendflow-query-cache`. Cache baru memakai key per user dan dicabut saat logout, sign-out otomatis, atau pergantian akun. Pada komputer bersama, gunakan browser profile terpisah dan hapus site data bila versi lama pernah dipakai.
+
+### Cache gagal tersimpan karena kuota
+
+Aplikasi membuang query tertua ketika persisten query melampaui kuota. Signed URL tidak ikut dipersist. Bila browser tetap menolak storage, hapus site data yang tidak diperlukan atau nonaktifkan cache dengan `VITE_ENABLE_OFFLINE_CACHE=false`; aplikasi online tetap dapat digunakan.
+
+## 9. SQL Supabase
 
 ### Extension tidak tersedia
 
@@ -188,7 +206,7 @@ npm run verify:static
 
 Jangan mengedit `sql/initial_backup.sql` langsung.
 
-## 9. ADMS / ZKTeco / Solution X105
+## 10. ADMS / ZKTeco / Solution X105
 
 ### Unit X105 tidak memiliki menu ADMS/Cloud
 
@@ -226,7 +244,7 @@ Mesin belum polling `/iclock/getrequest`, relay tidak meneruskan response, atau 
 
 Template biometrik bergantung algoritma, format, firmware, dan slot. Uji round-trip pada model identik. Metadata berhasil disimpan tidak berarti template lintas perangkat kompatibel.
 
-## 10. Deli E+
+## 11. Deli E+
 
 ### Signature invalid
 
@@ -244,7 +262,7 @@ Hentikan retry tak terbatas. Gunakan backoff yang dibatasi, hormati `Retry-After
 
 Implementasi tidak mengklaim payroll API native Deli. Gunakan ekspor file privat atau webhook perusahaan yang dikonfigurasi.
 
-## 11. Payroll
+## 12. Payroll
 
 ### Total berbeda dari hitung manual
 
@@ -258,7 +276,7 @@ Ini perilaku proteksi. Buat adjustment/settlement sesuai workflow; jangan menona
 
 Periksa data payroll item, lazy-loaded export dependency, browser memory, dan karakter yang didukung font PDF. CSV/print dapat digunakan sebagai fallback diagnosis, bukan pengganti perbaikan.
 
-## 12. Backup dan restore
+## 13. Backup dan restore
 
 ### `BACKUP_ENCRYPTION_KEY is required`
 
@@ -280,7 +298,7 @@ Restore memakai upsert bertahap, bukan satu transaksi lintas seluruh Function. C
 
 Backup organisasi tidak mencakup Supabase Auth accounts, Vault secrets, atau binary Storage object. Pulihkan komponen tersebut melalui prosedur terpisah yang terdokumentasi.
 
-## 13. Vercel
+## 14. Vercel
 
 ### Refresh nested route menghasilkan 404
 
@@ -294,7 +312,7 @@ Lihat browser Console dan header response. Tambahkan hanya origin yang benar-ben
 
 Redeploy setelah mengubah Vercel Environment Variables. Pastikan scope Preview/Production tepat.
 
-## 14. Data yang harus disertakan saat eskalasi
+## 15. Data yang harus disertakan saat eskalasi
 
 Sertakan:
 
