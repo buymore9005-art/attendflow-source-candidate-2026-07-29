@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: rgb(var(--background));
+  --color-foreground: rgb(var(--foreground));
+  --color-card: rgb(var(--card));
+  --color-card-foreground: rgb(var(--card-foreground));
+  --color-popover: rgb(var(--popover));
+  --color-popover-foreground: rgb(var(--popover-foreground));
+  --color-primary: rgb(var(--primary));
+  --color-primary-foreground: rgb(var(--primary-foreground));
+  --color-secondary: rgb(var(--secondary));
+  --color-secondary-foreground: rgb(var(--secondary-foreground));
+  --color-muted: rgb(var(--muted));
+  --color-muted-foreground: rgb(var(--muted-foreground));
+  --color-accent: rgb(var(--accent));
+  --color-accent-foreground: rgb(var(--accent-foreground));
+  --color-destructive: rgb(var(--destructive));
+  --color-destructive-foreground: rgb(var(--destructive-foreground));
+  --color-border: rgb(var(--border));
+  --color-input: rgb(var(--input));
+  --color-ring: rgb(var(--ring));
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
+}
+
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color-scheme: light;
+  --background: 248 250 252;
+  --foreground: 15 23 42;
+  --card: 255 255 255;
+  --card-foreground: 15 23 42;
+  --popover: 255 255 255;
+  --popover-foreground: 15 23 42;
+  --primary: 15 118 110;
+  --primary-foreground: 240 253 250;
+  --secondary: 241 245 249;
+  --secondary-foreground: 30 41 59;
+  --muted: 241 245 249;
+  --muted-foreground: 100 116 139;
+  --accent: 236 254 255;
+  --accent-foreground: 21 94 117;
+  --destructive: 220 38 38;
+  --destructive-foreground: 254 242 242;
+  --border: 226 232 240;
+  --input: 203 213 225;
+  --ring: 13 148 136;
+  --radius: 0.8rem;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: 2 6 23;
+  --foreground: 226 232 240;
+  --card: 15 23 42;
+  --card-foreground: 226 232 240;
+  --popover: 15 23 42;
+  --popover-foreground: 226 232 240;
+  --primary: 45 212 191;
+  --primary-foreground: 4 47 46;
+  --secondary: 30 41 59;
+  --secondary-foreground: 226 232 240;
+  --muted: 30 41 59;
+  --muted-foreground: 148 163 184;
+  --accent: 22 78 99;
+  --accent-foreground: 207 250 254;
+  --destructive: 248 113 113;
+  --destructive-foreground: 69 10 10;
+  --border: 51 65 85;
+  --input: 71 85 105;
+  --ring: 45 212 191;
+}
+
+* { border-color: rgb(var(--border)); }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: rgb(var(--background)); color: rgb(var(--foreground)); }
+button, input, textarea, select { font: inherit; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible {
+  outline: 2px solid rgb(var(--ring));
+  outline-offset: 2px;
+}
+::selection { background: rgb(var(--primary) / 0.25); }
+
+.bg-background { background-color: rgb(var(--background)); }
+.bg-card { background-color: rgb(var(--card)); }
+.bg-popover { background-color: rgb(var(--popover)); }
+.bg-primary { background-color: rgb(var(--primary)); }
+.bg-secondary { background-color: rgb(var(--secondary)); }
+.bg-muted { background-color: rgb(var(--muted)); }
+.bg-accent { background-color: rgb(var(--accent)); }
+.bg-destructive { background-color: rgb(var(--destructive)); }
+.text-foreground { color: rgb(var(--foreground)); }
+.text-card-foreground { color: rgb(var(--card-foreground)); }
+.text-popover-foreground { color: rgb(var(--popover-foreground)); }
+.text-primary { color: rgb(var(--primary)); }
+.text-primary-foreground { color: rgb(var(--primary-foreground)); }
+.text-secondary-foreground { color: rgb(var(--secondary-foreground)); }
+.text-muted-foreground { color: rgb(var(--muted-foreground)); }
+.text-accent-foreground { color: rgb(var(--accent-foreground)); }
+.text-destructive { color: rgb(var(--destructive)); }
+.text-destructive-foreground { color: rgb(var(--destructive-foreground)); }
+.border-border { border-color: rgb(var(--border)); }
+.border-input { border-color: rgb(var(--input)); }
+.ring-ring { --tw-ring-color: rgb(var(--ring)); }
+.shadow-card { box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 10px 30px rgb(15 23 42 / 0.05); }
+.dark .shadow-card { box-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px rgb(0 0 0 / 0.2); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

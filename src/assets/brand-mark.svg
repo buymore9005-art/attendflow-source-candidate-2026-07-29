@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">AttendFlow</title>
+  <desc id="desc">Abstract fingerprint and check mark</desc>
+  <defs>
+    <linearGradient id="g" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#14b8a6"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#g)"/>
+  <path d="M20 31c0-7 5-12 12-12s12 5 12 12v6c0 8-5 14-12 17" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M26 32c0-4 2-7 6-7s6 3 6 7v6c0 5-2 8-6 11" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+  <path d="m16 43 6 6 12-14" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

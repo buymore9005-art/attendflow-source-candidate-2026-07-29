@@ -1,0 +1,29 @@
+[Unit]
+Description=AttendFlow ADMS LAN Relay
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=attendflow
+Group=attendflow
+WorkingDirectory=/opt/attendflow
+EnvironmentFile=/opt/attendflow/middleware/adms-relay/.env
+ExecStart=/usr/bin/node /opt/attendflow/middleware/adms-relay/server.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target

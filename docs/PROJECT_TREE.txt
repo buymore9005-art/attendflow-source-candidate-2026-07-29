@@ -1,0 +1,256 @@
+attendance-payroll-system/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── docs/
+│   ├── superpowers/
+│   │   ├── plans/
+│   │   │   └── 2026-07-28-attendance-payroll-system.md
+│   │   └── specs/
+│   │       └── 2026-07-28-attendance-payroll-system-design.md
+│   ├── API.md
+│   ├── BACKUP_RESTORE.md
+│   ├── ERD.md
+│   ├── PROJECT_STRUCTURE.md
+│   ├── PROJECT_TREE.txt
+│   ├── SECURITY.md
+│   ├── SOURCE_MANIFEST.sha256
+│   ├── TEST_CHECKLIST.md
+│   ├── TESTING.md
+│   ├── TROUBLESHOOTING.md
+│   └── VALIDATION_REPORT.md
+├── middleware/
+│   └── adms-relay/
+│       ├── .env.example
+│       ├── attendflow-adms-relay.service.example
+│       ├── device-tokens.example.json
+│       ├── README.md
+│       ├── relay.mjs
+│       └── server.mjs
+├── scripts/
+│   ├── generate-initial-backup.mjs
+│   ├── schema-contract.mjs
+│   ├── source-audit-helpers.mjs
+│   ├── verify-project-helpers.mjs
+│   └── verify-project.mjs
+├── sql/
+│   ├── 000_full_schema.sql
+│   ├── 001_seed.sql
+│   ├── 002_scheduler.sql
+│   └── initial_backup.sql
+├── src/
+│   ├── app/
+│   │   ├── App.test.tsx
+│   │   └── App.tsx
+│   ├── assets/
+│   │   └── brand-mark.svg
+│   ├── components/
+│   │   ├── crud/
+│   │   │   └── EntityFormDialog.tsx
+│   │   ├── data-table/
+│   │   │   ├── AdvancedFilters.tsx
+│   │   │   ├── DataPage.tsx
+│   │   │   ├── DataStates.tsx
+│   │   │   ├── DataTable.tsx
+│   │   │   └── DataToolbar.tsx
+│   │   ├── forms/
+│   │   ├── ui/
+│   │   │   ├── alert-dialog.tsx
+│   │   │   ├── avatar.tsx
+│   │   │   ├── badge.tsx
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── checkbox.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── dropdown-menu.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── label.tsx
+│   │   │   ├── progress.tsx
+│   │   │   ├── select.tsx
+│   │   │   ├── skeleton.tsx
+│   │   │   ├── switch.tsx
+│   │   │   ├── tabs.tsx
+│   │   │   ├── textarea.tsx
+│   │   │   └── tooltip.tsx
+│   │   ├── ErrorBoundary.tsx
+│   │   └── ProtectedImage.tsx
+│   ├── context/
+│   │   ├── AppProviders.tsx
+│   │   ├── AuthContext.tsx
+│   │   └── LocaleContext.tsx
+│   ├── hooks/
+│   │   ├── use-debounce.ts
+│   │   └── use-online-status.ts
+│   ├── i18n/
+│   │   ├── dictionaries.ts
+│   │   └── translator.ts
+│   ├── layout/
+│   │   ├── AppShell.tsx
+│   │   ├── CommandPalette.tsx
+│   │   ├── Header.tsx
+│   │   ├── navigation.ts
+│   │   └── Sidebar.tsx
+│   ├── lib/
+│   │   ├── env.ts
+│   │   ├── query-client.ts
+│   │   ├── supabase.ts
+│   │   └── utils.ts
+│   ├── middleware/
+│   │   ├── PermissionRoute.tsx
+│   │   └── ProtectedRoute.tsx
+│   ├── pages/
+│   │   ├── admin/
+│   │   │   ├── AuditPage.tsx
+│   │   │   ├── RolesPage.tsx
+│   │   │   └── UsersPage.tsx
+│   │   ├── attendance/
+│   │   │   ├── AttendancePages.tsx
+│   │   │   └── LeavePage.tsx
+│   │   ├── auth/
+│   │   │   ├── LoginPage.tsx
+│   │   │   └── OnboardingPage.tsx
+│   │   ├── common/
+│   │   │   └── CrudEntityPage.tsx
+│   │   ├── dashboard/
+│   │   │   └── DashboardPage.tsx
+│   │   ├── data/
+│   │   ├── devices/
+│   │   │   ├── BiometricsPage.tsx
+│   │   │   └── DevicesPage.tsx
+│   │   ├── employees/
+│   │   │   ├── EmployeeRegistrationPage.tsx
+│   │   │   └── EmployeesPage.tsx
+│   │   ├── errors/
+│   │   │   └── NotFoundPage.tsx
+│   │   ├── integrations/
+│   │   │   └── IntegrationPages.tsx
+│   │   ├── master/
+│   │   ├── notifications/
+│   │   │   └── NotificationsPage.tsx
+│   │   ├── organization/
+│   │   │   └── MasterDataPages.tsx
+│   │   ├── payroll/
+│   │   │   ├── PayrollRunsPage.tsx
+│   │   │   └── PayrollSettingsPage.tsx
+│   │   └── settings/
+│   │       ├── ConfigurationPage.tsx
+│   │       └── SettingsPage.tsx
+│   ├── services/
+│   │   ├── audit-service.ts
+│   │   ├── dashboard-service.ts
+│   │   ├── edge-function-service.ts
+│   │   ├── entity-service.ts
+│   │   ├── export-service.ts
+│   │   ├── import-service.ts
+│   │   ├── payroll-service.ts
+│   │   ├── settings-service.ts
+│   │   └── storage-service.ts
+│   ├── stores/
+│   │   └── ui-store.ts
+│   ├── test/
+│   │   └── setup.ts
+│   ├── types/
+│   │   ├── data-table.ts
+│   │   ├── domain.ts
+│   │   └── forms.ts
+│   ├── utils/
+│   │   ├── attendance-calculator.ts
+│   │   ├── crud-presets.ts
+│   │   ├── device-capabilities.ts
+│   │   ├── error-message.ts
+│   │   ├── export-safety.ts
+│   │   ├── format.ts
+│   │   ├── payroll-calculator.ts
+│   │   ├── permissions.ts
+│   │   ├── print-window.ts
+│   │   ├── retry.ts
+│   │   ├── sanitize.ts
+│   │   └── spreadsheet.ts
+│   ├── index.css
+│   ├── main.tsx
+│   └── vite-env.d.ts
+├── supabase/
+│   ├── functions/
+│   │   ├── _shared/
+│   │   │   ├── adms-parser.ts
+│   │   │   ├── adms-route.ts
+│   │   │   ├── backup-validation.ts
+│   │   │   ├── crypto.ts
+│   │   │   ├── deli-scheduler.ts
+│   │   │   ├── deli-signature.ts
+│   │   │   ├── device-capabilities.ts
+│   │   │   ├── http.ts
+│   │   │   ├── outbound-webhook.ts
+│   │   │   ├── pagination.ts
+│   │   │   ├── retry.ts
+│   │   │   └── supabase.ts
+│   │   ├── admin-users/
+│   │   │   └── index.ts
+│   │   ├── adms/
+│   │   │   └── index.ts
+│   │   ├── backup-restore/
+│   │   │   └── index.ts
+│   │   ├── deli-sync/
+│   │   │   └── index.ts
+│   │   ├── device-command/
+│   │   │   └── index.ts
+│   │   ├── scheduled-maintenance/
+│   │   │   └── index.ts
+│   │   └── .env.example
+│   └── config.toml
+├── tests-node/
+│   ├── adms-device-seen-contract.test.ts
+│   ├── adms-relay.test.ts
+│   ├── adms-route.test.ts
+│   ├── adms.test.ts
+│   ├── attendance.test.ts
+│   ├── backup-generator.test.ts
+│   ├── backup-validation.test.ts
+│   ├── ci-install-contract.test.ts
+│   ├── crud-presets.test.ts
+│   ├── deli-integration-contract.test.ts
+│   ├── deli-scheduler.test.ts
+│   ├── deli.test.ts
+│   ├── device-capabilities.test.ts
+│   ├── documentation-contract.test.ts
+│   ├── edge-permission.test.ts
+│   ├── error-localization.test.ts
+│   ├── export.test.ts
+│   ├── http.test.ts
+│   ├── i18n.test.ts
+│   ├── outbound-webhook.test.ts
+│   ├── pagination.test.ts
+│   ├── payroll-action-errors.test.ts
+│   ├── payroll.test.ts
+│   ├── pdf-export-contract.test.ts
+│   ├── permission.test.ts
+│   ├── print-window.test.ts
+│   ├── project-verifier.test.ts
+│   ├── retry.test.ts
+│   ├── schema-contract.test.ts
+│   ├── settings-authority.test.ts
+│   ├── source-audit.test.ts
+│   ├── spreadsheet.test.ts
+│   ├── status-localization.test.ts
+│   └── verification.test.ts
+├── .env.example
+├── .gitignore
+├── .nvmrc
+├── ADMS_SETUP.md
+├── DELI_E_PLUS_SETUP.md
+├── DEPLOY.md
+├── eslint.config.js
+├── FINGERPRINT_GUIDE.md
+├── index.html
+├── INSTALL.md
+├── package.json
+├── PAYROLL_GUIDE.md
+├── README.md
+├── SUPABASE_SETUP.md
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── USER_MANUAL.md
+├── vercel.json
+├── VERCEL_SETUP.md
+└── vite.config.ts
