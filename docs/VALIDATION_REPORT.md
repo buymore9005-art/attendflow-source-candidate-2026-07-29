@@ -4,9 +4,9 @@ Tanggal validasi: **29 Juli 2026 (Asia/Jakarta)**
 
 ## Kesimpulan
 
-Perbaikan cache lokal dan sinkronisasi Supabase telah melewati seluruh pemeriksaan yang tidak membutuhkan dependency browser terpasang: **157/157 core test lulus**, verifikasi kontrak project lulus, dan **157 file TypeScript/TSX** dapat diparse tanpa error syntax.
+Perbaikan cache lokal, transport Supabase, dan alur Data Karyawan telah melewati seluruh pemeriksaan yang tidak membutuhkan dependency browser terpasang: **167/167 core test lulus**, verifikasi kontrak project lulus, dan **160 file TypeScript/TSX** dapat diparse tanpa error syntax.
 
-Source candidate ini belum boleh disebut build produksi terverifikasi pada lingkungan ini. Clean install dari lockfile terblokir oleh registry npm yang tersedia, sehingga typecheck lengkap, ESLint, Vitest browser, dan Vite build tidak dapat diselesaikan. Status paket adalah **source candidate — cache/sync patch verified; dependency validation blocked**.
+Source candidate ini belum boleh disebut build produksi terverifikasi pada lingkungan ini. Clean install dari lockfile terblokir oleh registry npm yang tersedia, sehingga typecheck lengkap, ESLint, Vitest browser, dan Vite build tidak dapat diselesaikan. Status paket adalah **source candidate — cache/sync/API-key/employee-data patch verified; dependency validation blocked**.
 
 ## Lingkungan
 
@@ -31,8 +31,8 @@ npm run test:core
 Hasil fresh terakhir:
 
 ```text
-tests 157
-pass 157
+tests 167
+pass 167
 fail 0
 ```
 
@@ -45,7 +45,10 @@ Selain kontrak bisnis yang sudah ada, suite kini mencakup:
 - bootstrap profil, organisasi, dan izin dari cache ketika offline;
 - kestabilan Query Client saat token refresh user yang sama;
 - pemetaan seluruh tabel publication Realtime ke query cache organisasi;
-- fallback rekonsiliasi untuk koneksi Realtime yang terputus atau perubahan yang terlewat.
+- fallback rekonsiliasi untuk koneksi Realtime yang terputus atau perubahan yang terlewat;
+- injeksi header `apikey` pada batas transport untuk RPC dan query tabel karyawan tanpa membocorkan key ke origin lain;
+- disambiguasi foreign key pada query Data Karyawan;
+- invalidasi cache langsung setelah registrasi dan sinkronisasi Realtime tabel `employees`.
 
 ### Static project verifier
 
@@ -58,7 +61,7 @@ npm run verify:static
 Hasil fresh terakhir:
 
 ```text
-Static verification passed: 494 i18n keys, 417 literal references, 33 tables, 37 functions.
+Static verification passed: 495 i18n keys, 417 literal references, 33 tables, 37 functions.
 ```
 
 Verifier memeriksa import lokal/dependency declaration, kesetaraan kamus, freshness SQL bootstrap, transaksi/dollar quote, kontrak table/view/RPC/Storage/Edge Function, serta privilege function `SECURITY DEFINER`.
@@ -68,16 +71,16 @@ Verifier memeriksa import lokal/dependency declaration, kesetaraan kamus, freshn
 Source diperiksa dengan parser TypeScript global tanpa module resolution ke package npm:
 
 ```text
-TypeScript/TSX syntax passed: 157 files, 0 parse errors.
+TypeScript/TSX syntax passed: 160 files, 0 parse errors.
 ```
 
 Pemeriksaan parser membuktikan source dapat diparse, tetapi bukan pengganti semantic typecheck penuh.
 
 ### Integritas source
 
-- `git diff --check` tidak menemukan whitespace error.
+- `git diff --no-index --check` terhadap baseline tidak menemukan whitespace error.
 - `docs/PROJECT_TREE.txt` diregenerasi dari isi paket final.
-- `docs/SOURCE_MANIFEST.sha256` memuat checksum file source final, dengan manifest itu sendiri dan `package-lock.json` dikecualikan mengikuti format paket sebelumnya.
+- `docs/SOURCE_MANIFEST.sha256` memuat **212 checksum** file source final, dengan manifest itu sendiri dan `package-lock.json` dikecualikan mengikuti format paket sebelumnya.
 
 ## Gate yang terblokir oleh lingkungan
 

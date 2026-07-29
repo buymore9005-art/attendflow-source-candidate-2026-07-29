@@ -69,7 +69,9 @@ export async function createEntity<T extends Record<string, unknown>>(
   values: T
 ): Promise<Record<string, unknown>> {
   const organizationColumn = config.organizationColumn ?? 'organization_id';
-  const { data, error } = await getSupabase().from(config.table).insert({ ...values, [organizationColumn]: organizationId }).select().single();
+  // Ditambahkan as any pada payload insert untuk melewati pengecekan RejectExcessProperties
+  const payload = { ...values, [organizationColumn]: organizationId } as any;
+  const { data, error } = await getSupabase().from(config.table).insert(payload).select().single();
   if (error) throw error;
   return data as Record<string, unknown>;
 }
@@ -81,7 +83,8 @@ export async function updateEntity<T extends Record<string, unknown>>(
   values: T
 ): Promise<Record<string, unknown>> {
   const organizationColumn = config.organizationColumn ?? 'organization_id';
-  const { data, error } = await getSupabase().from(config.table).update(values).eq('id', id).eq(organizationColumn, organizationId).select().single();
+  // Ditambahkan as any pada payload update untuk melewati pengecekan RejectExcessProperties
+  const { data, error } = await getSupabase().from(config.table).update(values as any).eq('id', id).eq(organizationColumn, organizationId).select().single();
   if (error) throw error;
   return data as Record<string, unknown>;
 }
@@ -90,7 +93,7 @@ export async function deleteEntities(config: EntityRepositoryConfig, organizatio
   if (ids.length === 0) return;
   const organizationColumn = config.organizationColumn ?? 'organization_id';
   const query = config.softDelete
-    ? getSupabase().from(config.table).update({ deleted_at: new Date().toISOString() }).eq(organizationColumn, organizationId).in('id', ids)
+    ? getSupabase().from(config.table).update({ deleted_at: new Date().toISOString() } as any).eq(organizationColumn, organizationId).in('id', ids)
     : getSupabase().from(config.table).delete().eq(organizationColumn, organizationId).in('id', ids);
   const { error } = await query;
   if (error) throw error;
@@ -99,14 +102,14 @@ export async function deleteEntities(config: EntityRepositoryConfig, organizatio
 export async function bulkUpdateEntities(config: EntityRepositoryConfig, organizationId: string, ids: string[], patch: Record<string, unknown>): Promise<void> {
   if (ids.length === 0) return;
   const organizationColumn = config.organizationColumn ?? 'organization_id';
-  const { error } = await getSupabase().from(config.table).update(patch).eq(organizationColumn, organizationId).in('id', ids);
+  const { error } = await getSupabase().from(config.table).update(patch as any).eq(organizationColumn, organizationId).in('id', ids);
   if (error) throw error;
 }
 
 export async function importEntities(config: EntityRepositoryConfig, organizationId: string, rows: Record<string, unknown>[]): Promise<void> {
   if (rows.length === 0) return;
   const organizationColumn = config.organizationColumn ?? 'organization_id';
-  const payload = rows.map((row) => ({ ...row, [organizationColumn]: organizationId }));
+  const payload = rows.map((row) => ({ ...row, [organizationColumn]: organizationId })) as any;
   const request = config.upsertConflict
     ? getSupabase().from(config.table).upsert(payload, { onConflict: config.upsertConflict, ignoreDuplicates: false })
     : getSupabase().from(config.table).insert(payload);
@@ -117,5 +120,9 @@ export async function importEntities(config: EntityRepositoryConfig, organizatio
 export async function getLookupOptions(table: string, organizationId: string, labelColumn = 'name'): Promise<Array<{ value: string; label: string }>> {
   const { data, error } = await getSupabase().from(table).select(`id,${labelColumn}` as any).eq('organization_id', organizationId).is('deleted_at', null).order(labelColumn);
   if (error) throw error;
-  return (data ?? []).map((row) => ({ value: String((row as Record<string, unknown>).id), label: String((row as Record<string, unknown>)[labelColumn]) }));
+  // Menggunakan as unknown as Record<string, unknown> untuk membersihkan strict GenericStringError dari supabase
+  return (data ?? []).map((row) => ({ 
+    value: String((row as unknown as Record<string, unknown>).id), 
+    label: String((row as unknown as Record<string, unknown>)[labelColumn]) 
+  }));
 }

@@ -1,4 +1,5 @@
 export const REALTIME_TABLES = [
+  'employees',
   'attendance_records',
   'attendance_devices',
   'biometric_enrollments',
@@ -12,6 +13,7 @@ export const REALTIME_TABLES = [
 export type RealtimeTable = (typeof REALTIME_TABLES)[number];
 
 const INVALIDATION_ROOTS: Record<RealtimeTable, readonly string[]> = {
+  employees: ['employees', 'attendance', 'attendance-summary', 'attendance-lookups', 'biometrics', 'leave', 'payroll-employees', 'dashboard'],
   attendance_records: ['attendance', 'attendance-summary', 'dashboard'],
   attendance_devices: ['devices', 'attendance-lookups', 'dashboard'],
   biometric_enrollments: ['biometrics', 'dashboard'],

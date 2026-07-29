@@ -1549,7 +1549,7 @@ create policy attendflow_storage_delete on storage.objects for delete to authent
 do $$
 declare t text;
 begin
-  foreach t in array array['attendance_records','attendance_devices','biometric_enrollments','biometric_assets','device_commands','integration_jobs','system_notifications','payroll_runs'] loop
+  foreach t in array array['employees','attendance_records','attendance_devices','biometric_enrollments','biometric_assets','device_commands','integration_jobs','system_notifications','payroll_runs'] loop
     if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename=t) then execute format('alter publication supabase_realtime add table public.%I',t); end if;
   end loop;
 end $$;

@@ -67,3 +67,10 @@ test('Vercel guide states the current Hobby plan commercial-use limitation', asy
     assert.match(value, /perusahaan|commercial|komersial/i);
   }
 });
+
+test('deployment guide covers the Supabase gateway missing-apikey failure', async () => {
+  const vercel = await document('VERCEL_SETUP.md');
+  assert.match(vercel, /No API key found in request/i);
+  assert.match(vercel, /VITE_SUPABASE_PUBLISHABLE_KEY/);
+  assert.match(vercel, /redeploy/i);
+});

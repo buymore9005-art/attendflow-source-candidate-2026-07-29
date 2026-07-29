@@ -19,7 +19,7 @@ import { formatDate } from '@/utils/format';
 
 const repository: EntityRepositoryConfig = {
   table: 'employees',
-  select: '*,department:departments(id,name),position:positions(id,name),shift:shifts(id,name)',
+  select: '*,department:departments!employees_department_fk(id,name),position:positions!employees_position_fk(id,name),shift:shifts!employees_shift_fk(id,name)',
   searchFields: ['employee_no', 'nik', 'full_name', 'email', 'phone'],
   softDelete: true,
   defaultSort: { column: 'full_name', ascending: true },

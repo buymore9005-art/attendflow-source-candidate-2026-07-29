@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, FileImage, LoaderCircle, UploadCloud } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useForm, type FieldErrors, type FieldPath } from 'react-hook-form';
@@ -82,6 +82,7 @@ export default function EmployeeRegistrationPage() {
   const { t } = useLocale();
   const { activeMembership } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const organizationId = activeMembership?.organization_id ?? '';
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -127,6 +128,7 @@ export default function EmployeeRegistrationPage() {
         const { error: updateError } = await getSupabase().from('employees').update(paths).eq('id', result.id).eq('organization_id', organizationId);
         if (updateError) throw updateError;
       }
+      await queryClient.invalidateQueries({ queryKey: ['employees', organizationId] });
       toast.success(t('notification.saved'), { description: `${result.employee_no} · ${parsed.full_name}` });
       navigate('/employees', { replace: true });
     } catch (error) {

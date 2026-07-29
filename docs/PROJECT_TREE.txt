@@ -97,6 +97,7 @@ attendance-payroll-system/
 │   │   ├── query-cache-policy.ts
 │   │   ├── query-client.ts
 │   │   ├── realtime-sync.ts
+│   │   ├── supabase-transport.ts
 │   │   ├── supabase.ts
 │   │   └── utils.ts
 │   ├── middleware/
@@ -219,6 +220,7 @@ attendance-payroll-system/
 │   ├── device-capabilities.test.ts
 │   ├── documentation-contract.test.ts
 │   ├── edge-permission.test.ts
+│   ├── employee-data-contract.test.ts
 │   ├── error-localization.test.ts
 │   ├── export.test.ts
 │   ├── http.test.ts
@@ -239,6 +241,7 @@ attendance-payroll-system/
 │   ├── source-audit.test.ts
 │   ├── spreadsheet.test.ts
 │   ├── status-localization.test.ts
+│   ├── supabase-transport.test.ts
 │   └── verification.test.ts
 ├── .env.example
 ├── .gitignore

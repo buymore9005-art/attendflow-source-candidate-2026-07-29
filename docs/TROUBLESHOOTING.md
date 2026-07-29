@@ -101,6 +101,10 @@ Restart Vite setelah mengubah `.env`. Variable Vite dibaca saat build/start, buk
 
 Gunakan Project URL lengkap dengan `https://`. Jangan gunakan database connection string sebagai `VITE_SUPABASE_URL`.
 
+### `No API key found in request`
+
+Request mencapai gateway Supabase tanpa header `apikey`. Periksa `VITE_SUPABASE_PUBLISHABLE_KEY`, pastikan key berasal dari project yang sama dengan `VITE_SUPABASE_URL`, lalu redeploy karena variable `VITE_*` dibaca saat build. Source terbaru memasang transport guard untuk RPC, query tabel seperti `/rest/v1/employees`, Storage, dan request SDK lain ke origin Supabase tanpa menimpa JWT user.
+
 ### Service-role terlihat di browser
 
 Segera rotasi key. Hapus dari semua variable `VITE_*`, Git history, CI log, dan deployment. Service-role hanya boleh menjadi secret Supabase Edge Function/server-side.
@@ -137,6 +141,10 @@ Jangan memakai service-role untuk mendiagnosis apakah policy user bekerja.
 
 Periksa GRANT dan policy pada schema, lalu jalankan schema terbaru pada staging. Pastikan RPC dipanggil dengan signature yang benar.
 
+### Data Karyawan menampilkan `PGRST201` atau relasi departemen ambigu
+
+Schema memiliki relasi karyawan-ke-departemen dan departemen-ke-manager. Gunakan source terbaru yang memilih constraint `employees_department_fk` secara eksplisit, lalu redeploy frontend. Jangan menghapus foreign key manager sebagai workaround.
+
 ### Data organisasi lain terlihat
 
 Hentikan go-live. Simpan request reproduksi, user ID, JWT claims, table, dan query. Audit policy/FK organisasi sebelum melanjutkan; ini adalah insiden isolasi tenant.
@@ -159,7 +167,7 @@ Bucket privat memerlukan signed URL yang belum kedaluwarsa. Pastikan object path
 
 ### UI tidak diperbarui otomatis
 
-Periksa apakah kedelapan tabel operasional tercantum di publication `supabase_realtime`, koneksi WebSocket, CSP `connect-src`, RLS user, dan status project. Aplikasi memakai satu channel terpusat per user/organisasi dan rekonsiliasi setiap 30 detik ketika tab online serta terlihat. Refresh manual harus tetap bekerja sebagai fallback.
+Periksa apakah sembilan tabel operasional tercantum di publication `supabase_realtime`, koneksi WebSocket, CSP `connect-src`, RLS user, dan status project. Aplikasi memakai satu channel terpusat per user/organisasi dan rekonsiliasi setiap 30 detik ketika tab online serta terlihat. Refresh manual harus tetap bekerja sebagai fallback. Untuk project yang sudah ada sebelum hotfix data karyawan, jalankan schema terbaru atau tambahkan `public.employees` ke publication agar perubahan dari perangkat/browser lain ikut tersinkron.
 
 ### Perubahan hapus baru terlihat terlambat
 

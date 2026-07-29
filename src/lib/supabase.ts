@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { env } from './env';
+import { createSupabaseTransport } from './supabase-transport';
 
 let client: SupabaseClient | null = null;
 
@@ -20,7 +21,11 @@ export function getSupabase(): SupabaseClient {
       flowType: 'pkce'
     },
     global: {
-      headers: { 'x-client-info': 'attendflow-web/1.0.0' }
+      fetch: createSupabaseTransport(env.supabaseUrl, env.supabasePublishableKey),
+      headers: {
+        apikey: env.supabasePublishableKey,
+        'x-client-info': 'attendflow-web/1.0.0'
+      }
     },
     realtime: {
       params: { eventsPerSecond: 10 }

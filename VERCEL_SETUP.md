@@ -102,6 +102,18 @@ Pastikan `vercel.json` berada di root dan Vercel menggunakan Output Directory `d
 
 Vite membaca environment saat build. Perbarui Environment Variables lalu redeploy.
 
+### `No API key found in request`
+
+Pesan ini berarti request mencapai API Gateway Supabase tanpa header `apikey`. Pastikan:
+
+1. `VITE_SUPABASE_URL` adalah Project URL yang tepat, tanpa path tambahan.
+2. `VITE_SUPABASE_PUBLISHABLE_KEY` berisi publishable key (`sb_publishable_...`) atau legacy anon key dari project yang sama—bukan secret/service-role key.
+3. Variable tersedia pada environment Vercel yang sedang digunakan (Production, Preview, atau Development).
+4. Setelah mengubah variable, lakukan redeploy; Vite menanamkan variable `VITE_` pada saat build.
+5. Buka deployment baru lalu lakukan hard refresh. Pada Network tab, request `/rest/v1/employees` dan `/rest/v1/rpc/register_employee` harus memiliki request header `apikey`. Jangan menyalin nilai key tersebut ke laporan, screenshot, atau log publik.
+
+Versi aplikasi ini juga memasang transport guard yang menambahkan `apikey` pada batas request Supabase. Jika error tetap muncul setelah redeploy, periksa apakah URL Supabase mengalami redirect ke host project lain atau ada proxy yang menghapus header request.
+
 ### Supabase Auth redirect gagal
 
 Scheme, host, dan path redirect harus cocok dengan deployment. Periksa browser Network tab dan Supabase Auth logs.
