@@ -13,7 +13,7 @@ import type { DataColumn, FilterDefinition, PageQuery, PageResult } from '@/type
 import type { AttendanceRecord } from '@/types/domain';
 import type { FormFieldConfig } from '@/types/forms';
 import { formatDate, formatDateTime, formatMinutes } from '@/utils/format';
-
+import { getSupabase } from "@/lib/supabase";
 const attendanceRepository: EntityRepositoryConfig = {
   table: 'attendance_records',
   select: '*,employee:employees(employee_no,full_name),shift:shifts(name),device:attendance_devices(name)',
